@@ -38,13 +38,33 @@ def middle_point(point_list_1, point_list_2):
     return result
 
 
-def get_middle_polygon(polygon_1, polygon_2, num):
+def center_point(ploygon):
+    (x, y) = zip(*ploygon)
+    return 1.0 * sum(x) / len(x), 1.0 * sum(y) / len(y)
+
+
+def shift(polygon, point):
+    return [(p[0] + point[0], p[1] + point[1]) for p in polygon]
+
+def shift_back(polygon, point):
+    assert type(polygon) is list
+    assert type(point) is tuple
+    return [(p[0] - point[0], p[1] - point[1]) for p in polygon]
+
+
+def get_middle_polygon(polygon_1, polygon_2, center=None, num=30):
     """
     Get middle polygon of two polygons.
     @param polygon_1: polygon 1 of type [(x1, y1), (x2, y2), ...]
     @param polygon_2: polygon 1 of type [(x1, y1), (x2, y2), ...]
+    @param center: center of polygon
     @param num: split circle partitions
     """
+    assert center is None or type(center) is tuple, "param center error"
+    if center is None:
+        center = center_point(polygon_1)
+    polygon_1 = shift_back(polygon_1, center)
+    polygon_2 = shift_back(polygon_2, center)
     sp1 = split_polygon(polygon_1, num)
     sp2 = split_polygon(polygon_2, num)
     results = []
@@ -54,7 +74,7 @@ def get_middle_polygon(polygon_1, polygon_2, num):
             pass
         else:
             results.append(middle_point(s1, s2))
-    return results
+    return shift(results, center)
 
 
 def get_polygon(num, radius, diff_x, diff_y):
@@ -76,11 +96,9 @@ def plot_polygon(polygon, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    num = 30
-
     p1 = get_polygon(30, 20, 5, 15)
     p2 = get_polygon(20, 10, 3, 5)
-    p3 = get_middle_polygon(p1, p2, num)
+    p3 = get_middle_polygon(p1, p2, num=30)
 
     plot_polygon(p1, 'b')
     plot_polygon(p2, 'r')
